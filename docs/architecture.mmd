@@ -1,0 +1,19 @@
+flowchart TD
+  U[Shopper request] --> A[AI agent - Claude API<br/>no payment credentials]
+  A -->|structured proposal| G1{PoS gate: PROPOSE}
+  G1 -->|REJECT| X[Blocked and logged]
+  G1 -->|ACT_NOW| H[Human confirms exact item + amount]
+  H --> G2{PoS gate: CREATE_ORDER}
+  G2 -->|REJECT| X
+  G2 -->|ACT_NOW, one attempt| P[PayPal Sandbox order]
+  P --> B[Buyer approves in PayPal]
+  B --> S[App reads order status from PayPal]
+  S --> G3{PoS gate: CAPTURE}
+  G3 -->|WAIT or REJECT| X
+  G3 -->|ACT_NOW| C[Capture, accepted only if PayPal confirms COMPLETED and the approved amount]
+  C --> L[(Evidence ledger: SQLite + SHA-256 chain<br/>every step above is recorded)]
+  X --> L
+  subgraph Gate implementations
+    D[Demo policy adapter - public, in this repo]
+    R[Private Proof-of-Silence gateway - optional, not in this repo]
+  end

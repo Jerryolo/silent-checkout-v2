@@ -1,0 +1,181 @@
+{
+  "tool": "neonai.shop Silent Checkout v2",
+  "exported_at": 1794230065,
+  "gate": "demo-policy-adapter (public, not the proprietary PoS engine)",
+  "ai_provider": "anthropic",
+  "proposals": [
+    {
+      "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+      "request_text": "I need a tool to check my AI project's EU AI Act exposure.I need a tool to check my AI project's EU AI Act exposure.",
+      "item_id": "NS-SCAN-STD",
+      "item_name": "AI Risk Scanner (Standard)",
+      "amount": "9.00",
+      "currency": "EUR",
+      "ai_reason": "The AI Risk Scanner (Standard) is the catalogue item for assessing AI projects, so it best fits a request to check EU AI Act exposure.",
+      "ai_provider": "anthropic",
+      "status": "CAPTURED",
+      "approved_at": 1794229617.2709575,
+      "approval_used": 1,
+      "order_id": "61G66411HL478774X",
+      "paypal_status": "COMPLETED",
+      "capture_id": "3L217610BM083854W",
+      "created_at": 1794229535
+    }
+  ],
+  "evidence": [
+    {
+      "seq": 1,
+      "event": "AI_PROPOSAL",
+      "payload": {
+        "amount": "9.00",
+        "currency": "EUR",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "item_id": "NS-SCAN-STD",
+        "provider": "anthropic"
+      },
+      "time": 1794229535986,
+      "previous": "0000000000000000000000000000000000000000000000000000000000000000",
+      "hash": "e59b811c3762665775152ccee7771582d74ee26b0d1d37103a88a14424a6fdc8"
+    },
+    {
+      "seq": 2,
+      "event": "GATE_PROPOSE",
+      "payload": {
+        "decision": "ACT_NOW",
+        "gate": "demo-policy-adapter (public, not the proprietary PoS engine)",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "reasons": [
+          "proposal within policy"
+        ]
+      },
+      "time": 1794229535986,
+      "previous": "e59b811c3762665775152ccee7771582d74ee26b0d1d37103a88a14424a6fdc8",
+      "hash": "4bff8dbb5925e6ede311e958544d7ccf091d96dc0eabc02d3fc6548c3a3fde27"
+    },
+    {
+      "seq": 3,
+      "event": "HUMAN_APPROVAL_MISMATCH",
+      "payload": {
+        "confirmed": "1.00",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "shown": "9.00"
+      },
+      "time": 1794229579346,
+      "previous": "4bff8dbb5925e6ede311e958544d7ccf091d96dc0eabc02d3fc6548c3a3fde27",
+      "hash": "34337f6c894e40e4f0de11b2eb585b97e31d26a18afc048765d766cdbe7632e0"
+    },
+    {
+      "seq": 4,
+      "event": "HUMAN_APPROVE",
+      "payload": {
+        "amount": "9.00",
+        "binding": "4a4af14480ff5f77f40e615fb62d9eabe17503106774ddbd05c9a331452532c9",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "item_id": "NS-SCAN-STD"
+      },
+      "time": 1794229617270,
+      "previous": "34337f6c894e40e4f0de11b2eb585b97e31d26a18afc048765d766cdbe7632e0",
+      "hash": "c252cf019f0f4fafe1e6142e15d1470cc8d65856e802280022ef847832fa9280"
+    },
+    {
+      "seq": 5,
+      "event": "GATE_CREATE_ORDER",
+      "payload": {
+        "decision": "ACT_NOW",
+        "gate": "demo-policy-adapter (public, not the proprietary PoS engine)",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "reasons": [
+          "human approval valid and unused"
+        ]
+      },
+      "time": 1794229644494,
+      "previous": "c252cf019f0f4fafe1e6142e15d1470cc8d65856e802280022ef847832fa9280",
+      "hash": "fcd96a2ee1b74227ca5c42297fb0fc2ef7cdaf882ccee92fc96ad7ad737ccc96"
+    },
+    {
+      "seq": 6,
+      "event": "ORDER_ATTEMPT",
+      "payload": {
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51"
+      },
+      "time": 1794229644494,
+      "previous": "fcd96a2ee1b74227ca5c42297fb0fc2ef7cdaf882ccee92fc96ad7ad737ccc96",
+      "hash": "298a28c93e34365663d6e4bf4f9af18fa04ce10e41a9a0232d6417e3ecb8f313"
+    },
+    {
+      "seq": 7,
+      "event": "ORDER_CREATED",
+      "payload": {
+        "debug_id": "f942958ec763b",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "order_id": "61G66411HL478774X",
+        "paypal_status": "PAYER_ACTION_REQUIRED"
+      },
+      "time": 1794229645696,
+      "previous": "298a28c93e34365663d6e4bf4f9af18fa04ce10e41a9a0232d6417e3ecb8f313",
+      "hash": "e965d98bc59cb11677912e2aa681a13173a2c1ebda6b16b15a246e1e7871453e"
+    },
+    {
+      "seq": 8,
+      "event": "PAYPAL_STATUS",
+      "payload": {
+        "amount": "9.00",
+        "currency": "EUR",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "order_id": "61G66411HL478774X",
+        "status": "APPROVED"
+      },
+      "time": 1794229980345,
+      "previous": "e965d98bc59cb11677912e2aa681a13173a2c1ebda6b16b15a246e1e7871453e",
+      "hash": "77e180ae06d397732762995f087fd22c555e49fe3079b2b65f0c85dc132b8017"
+    },
+    {
+      "seq": 9,
+      "event": "GATE_CAPTURE",
+      "payload": {
+        "decision": "ACT_NOW",
+        "gate": "demo-policy-adapter (public, not the proprietary PoS engine)",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "paypal_status": "APPROVED",
+        "reasons": [
+          "buyer approved exact amount in PayPal"
+        ]
+      },
+      "time": 1794230040312,
+      "previous": "77e180ae06d397732762995f087fd22c555e49fe3079b2b65f0c85dc132b8017",
+      "hash": "4e400b93dca78a8608f1b680f8f89321a3f552eefffc633035ee4a06bf5f5c8d"
+    },
+    {
+      "seq": 10,
+      "event": "CAPTURE_ATTEMPT",
+      "payload": {
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "order_id": "61G66411HL478774X"
+      },
+      "time": 1794230040314,
+      "previous": "4e400b93dca78a8608f1b680f8f89321a3f552eefffc633035ee4a06bf5f5c8d",
+      "hash": "b311595fc0ba67d676ee27e456e0ca206733c0a1e942c72f7f8d4ba65ff2f99c"
+    },
+    {
+      "seq": 11,
+      "event": "CAPTURE_VERIFIED",
+      "payload": {
+        "amount": "9.00",
+        "capture_id": "3L217610BM083854W",
+        "capture_status": "COMPLETED",
+        "currency": "EUR",
+        "debug_id": "f886558464f7b",
+        "id": "a32944bc-a399-4af2-8aee-4cde75b95f51",
+        "order_status": "COMPLETED"
+      },
+      "time": 1794230042323,
+      "previous": "b311595fc0ba67d676ee27e456e0ca206733c0a1e942c72f7f8d4ba65ff2f99c",
+      "hash": "0de0466e7246e121b373f1cbd05190126966a723f6418799a45923f58f6b64ca"
+    }
+  ],
+  "verify": {
+    "intact": true,
+    "entries": 11,
+    "head": "0de0466e7246e121b373f1cbd05190126966a723f6418799a45923f58f6b64ca"
+  }
+}

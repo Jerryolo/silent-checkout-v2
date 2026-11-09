@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>neonai.shop · Silent Checkout v2</title>
+<style>
+:root{--bg:#0a0f1a;--panel:#121b2c;--line:#25344d;--ink:#e8eef7;--mute:#8fa3bd;--acc:#66dce7;--ok:#5ad38f;--warn:#f2c14e;--bad:#ff5a6e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:24px 16px 48px}h1{font-size:22px;margin:0}h2{font-size:15px;margin:0 0 10px}
+.sub{color:var(--mute);margin:4px 0 14px;font-size:13px}.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.b{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--mute)}.b.on{color:var(--ok);border-color:var(--ok)}.b.mock{color:var(--warn);border-color:var(--warn)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+textarea,input{width:100%;background:#0a1220;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}
+button,.btn{background:var(--acc);color:#06222a;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer;margin:8px 6px 0 0;text-decoration:none;display:inline-block}
+button.sec{background:#1b2740;color:var(--ink);border:1px solid var(--line);font-weight:500}button:disabled{opacity:.35;cursor:not-allowed}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font-size:14px}.kv dt{color:var(--mute)}.kv dd{margin:0;word-break:break-all}
+.v{display:inline-block;font-weight:700;padding:2px 10px;border-radius:6px}.ACT_NOW{background:rgba(90,211,143,.15);color:var(--ok)}.WAIT{background:rgba(242,193,78,.15);color:var(--warn)}.REJECT{background:rgba(255,90,110,.15);color:var(--bad)}
+.msg{font-size:13px;color:var(--mute);margin-top:8px;white-space:pre-wrap}.err{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mute);font-weight:500}
+.wrap{overflow-x:auto;max-height:360px}.ok{color:var(--ok)}.bad{color:var(--bad)}
+</style></head><body><main>
+<h1>Silent Checkout v2</h1>
+<p class="sub">neonai.shop · AI shopping agent with a Proof-of-Silence™ gate and human approval · PayPal <b>Sandbox</b> only</p>
+<div class="badges">
+<span class="b {{ 'mock' if ai_provider=='mock' else 'on' }}">AI: {{ 'MOCK (offline demo)' if ai_provider=='mock' else ai_provider }}</span>
+<span class="b">Gate: {{ gate }}</span>
+<span class="b {{ 'on' if create_enabled }}">Order creation: {{ 'ON' if create_enabled else 'OFF' }}</span>
+<span class="b {{ 'on' if capture_enabled }}">Capture: {{ 'ON' if capture_enabled else 'OFF' }}</span>
+</div>
+
+<section><h2>1. Ask the AI agent</h2>
+<textarea id="req" rows="2">I need a tool to check my AI project's EU AI Act exposure.</textarea>
+<button onclick="propose()">Get proposal</button><div class="msg" id="m1"></div></section>
+
+<section><h2>2. AI proposal and gate verdict</h2><div id="prop" class="msg">No proposal yet.</div></section>
+
+<section><h2>3. Human approval of the exact amount</h2>
+<p class="msg">Type the amount shown above to confirm. The approval is bound to this item and amount.</p>
+<input id="confirm" placeholder="e.g. 9.00" inputmode="decimal">
+<button id="bApprove" onclick="approve()" disabled>Approve</button><button id="bReject" class="sec" onclick="rejectP()" disabled>Reject</button>
+<div class="msg" id="m3"></div></section>
+
+<section><h2>4. PayPal Sandbox</h2>
+<button id="bCreate" onclick="createOrder()" disabled>Create sandbox order (one attempt)</button>
+<a id="payLink" class="btn" style="display:none" target="_blank" rel="noopener">Approve in PayPal Sandbox →</a>
+<button id="bCheck" class="sec" onclick="check()" disabled>Check PayPal status</button>
+<button id="bCapture" onclick="captureP()" disabled>Capture (gate-checked)</button>
+<div class="msg" id="m4"></div></section>
+
+<section><h2>5. Evidence ledger</h2>
+<button class="sec" onclick="loadEvidence()">Refresh</button>
+<a class="btn" href="/api/export.csv">Download CSV</a><a class="btn" href="/api/export.json">Download JSON</a>
+<button class="sec" onclick="copyExport('csv')">Copy CSV</button><button class="sec" onclick="copyExport('json')">Copy JSON</button>
+<h2 style="margin-top:14px">Audit Summary</h2><dl class="kv" id="summary"><dt>Status</dt><dd>Not loaded</dd></dl>
+<div class="wrap" style="margin-top:10px"><table><thead><tr><th>#</th><th>Event</th><th>Decision</th><th>Hash</th></tr></thead><tbody id="ev"></tbody></table></div>
+<div class="msg" id="m5"></div></section>
+<p class="msg">Sandbox demo. The public gate adapter is a small open rule set for this demo, not the proprietary Proof-of-Silence engine. No real money moves.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);let P=null;
+async function call(url,method='GET',body){const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});let j={};try{j=await r.json()}catch(e){}if(!r.ok){const e=new Error(j.error||('HTTP '+r.status));e.data=j;throw e}return j}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function verdictHtml(v){return v?`<span class="v ${esc(v.decision)}">${esc(v.decision)}</span> <span>${esc((v.reasons||[]).join('; '))}</span>`:''}
+function show(p,v){P=p;$('prop').innerHTML=`<dl class="kv"><dt>Item</dt><dd>${esc(p.item_name)} (${esc(p.item_id)})</dd><dt>Amount</dt><dd><b>${esc(p.amount)} ${esc(p.currency)}</b></dd><dt>AI reason</dt><dd>${esc(p.ai_reason)}</dd><dt>AI provider</dt><dd>${esc(p.ai_provider)}</dd><dt>Status</dt><dd>${esc(p.status)}</dd>${p.order_id?`<dt>PayPal order</dt><dd>${esc(p.order_id)} · ${esc(p.paypal_status||'')}</dd>`:''}${v?`<dt>Gate</dt><dd>${verdictHtml(v)}</dd>`:''}</dl>`;buttons()}
+function buttons(){const s=P&&P.status;$('bApprove').disabled=s!=='PROPOSED';$('bReject').disabled=s!=='PROPOSED';$('bCreate').disabled=s!=='APPROVED';$('bCheck').disabled=!(P&&P.order_id);$('bCapture').disabled=s!=='ORDER_CREATED'}
+async function propose(){$('m1').textContent='Asking the agent…';try{const j=await call('/api/propose','POST',{request:$('req').value});$('m1').textContent='';show(j.proposal,j.verdict);loadEvidence()}catch(e){$('m1').innerHTML=`<span class="err">${esc(e.message)}</span>`}}
+async function approve(){try{const j=await call('/api/approve/'+P.id,'POST',{amount:$('confirm').value,item_id:P.item_id});$('m3').textContent='Approved: '+j.proposal.amount+' EUR';show(j.proposal)}catch(e){$('m3').innerHTML=`<span class="err">${esc(e.message)}</span>`}loadEvidence()}
+async function rejectP(){try{await call('/api/reject/'+P.id,'POST');await refresh()}catch(e){$('m3').innerHTML=`<span class="err">${esc(e.message)}</span>`}loadEvidence()}
+async function createOrder(){if(!confirm('Create ONE PayPal Sandbox order? It will never be retried automatically.'))return;try{const j=await call('/api/paypal/create/'+P.id,'POST');$('m4').textContent='Order '+j.order_id+' created. Approve it in PayPal, then press "Check PayPal status".';if(j.approve_url){$('payLink').href=j.approve_url;$('payLink').style.display='inline-block'}}catch(e){$('m4').innerHTML=`<span class="err">${esc(e.message)}</span>${e.data&&e.data.verdict?'<br>'+verdictHtml(e.data.verdict):''}`}await refresh();loadEvidence()}
+async function check(){try{const j=await call('/api/paypal/check/'+P.id,'POST');$('m4').textContent='PayPal says: '+j.paypal.status+' · '+j.paypal.amount+' '+j.paypal.currency}catch(e){$('m4').innerHTML=`<span class="err">${esc(e.message)}</span>`}await refresh();loadEvidence()}
+async function captureP(){if(!confirm('Capture this Sandbox payment? Only possible if the buyer approved the exact amount in PayPal.'))return;try{const j=await call('/api/paypal/capture/'+P.id,'POST');$('m4').innerHTML=`<span class="ok">CAPTURED, verified with PayPal: ${esc(j.capture.capture_id)} · ${esc(j.capture.amount)} ${esc(j.capture.currency)}</span>`}catch(e){$('m4').innerHTML=`<span class="err">${esc(e.message)}</span>${e.data&&e.data.verdict?'<br>'+verdictHtml(e.data.verdict):''}`}await refresh();loadEvidence()}
+async function refresh(){if(!P)return;const j=await call('/api/status/'+P.id);show(j.proposal)}
+let EV=null;
+async function loadEvidence(){try{EV=await call('/api/evidence');const es=EV.entries;$('ev').innerHTML=es.slice().reverse().map(e=>`<tr><td>${e.seq}</td><td>${esc(e.event)}</td><td>${e.payload.decision?`<span class="v ${esc(e.payload.decision)}">${esc(e.payload.decision)}</span>`:''}</td><td>${esc(e.hash.slice(0,16))}…</td></tr>`).join('');
+const cnt=k=>es.filter(e=>e.event===k).length,dec=d=>es.filter(e=>e.payload.decision===d).length;
+$('summary').innerHTML=`<dt>Chain</dt><dd class="${EV.verify.intact?'ok':'bad'}">${EV.verify.intact?'INTACT':'BROKEN at seq '+EV.verify.broken_at_seq} · ${EV.verify.entries} entries</dd><dt>Head hash</dt><dd>${esc(EV.verify.head||'—')}</dd><dt>AI proposals</dt><dd>${cnt('AI_PROPOSAL')}</dd><dt>Gate verdicts</dt><dd>ACT_NOW ${dec('ACT_NOW')} · WAIT ${dec('WAIT')} · REJECT ${dec('REJECT')}</dd><dt>Human approvals / rejections</dt><dd>${cnt('HUMAN_APPROVE')} / ${cnt('HUMAN_REJECT')} (mismatches ${cnt('HUMAN_APPROVAL_MISMATCH')})</dd><dt>Orders created</dt><dd>${cnt('ORDER_CREATED')}</dd><dt>Verified captures</dt><dd>${cnt('CAPTURE_VERIFIED')}</dd><dt>Uncertain (manual review)</dt><dd>${cnt('ORDER_UNCERTAIN')+cnt('CAPTURE_UNCERTAIN')+cnt('CAPTURE_UNVERIFIED')+cnt('STARTUP_RECOVERY')}</dd><dt>Gate</dt><dd>${esc(EV.gate)}</dd>`}catch(e){$('m5').textContent=e.message}}
+async function copyExport(kind){try{const r=await fetch('/api/export.'+kind);await navigator.clipboard.writeText(await r.text());$('m5').textContent='Copied '+kind.toUpperCase()+' to clipboard.'}catch(e){$('m5').textContent='Clipboard not available here; use Download.'}}
+(async()=>{const pid=new URLSearchParams(location.search).get('pid');if(pid){P={id:pid};await refresh().catch(()=>{});$('m4').textContent='Back from PayPal. Press "Check PayPal status".'}loadEvidence()})();
+</script></body></html>
