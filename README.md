@@ -46,7 +46,7 @@ Built for the PayPal AI Hackathon 2026. **Sandbox only. No real money moves.**
 
 Exports: `docs/evidence/onetake_run_2026-11-09.json` / `.csv`. An earlier, separate Sandbox session
 (order `8HE008159R316804W`, capture `2T479471T7932424S`) is kept as `docs/evidence/earlier_session_2026-11-09.*`.
-Demo video: https://www.youtube.com/watch?v=lUKt2iLQk2w
+Demo video: https://www.youtube.com/watch?v=VO12f7y8Wmg
 
 ## Try it as a judge
 
